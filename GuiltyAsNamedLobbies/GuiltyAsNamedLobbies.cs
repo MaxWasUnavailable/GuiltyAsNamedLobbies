@@ -1,6 +1,8 @@
 ﻿using System;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
+using GuiltyAsNamedLobbies.Features;
 using HarmonyLib;
 
 namespace GuiltyAsNamedLobbies;
@@ -24,6 +26,10 @@ public class GuiltyAsNamedLobbies : BaseUnityPlugin
 
         Logger?.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
 
+        // Load configuration
+        GANLConfig.Init();
+
+        // Harmony patch
         PatchAll();
 
         if (IsPatched)

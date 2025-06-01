@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using GuiltyAsNamedLobbies.Features;
 using HarmonyLib;
+using Steamworks;
 
 namespace GuiltyAsNamedLobbies.Patches;
 
@@ -14,13 +16,14 @@ internal static class SteamLobbyPatches
     private static IEnumerable<CodeInstruction> SteamLobbyTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         return new CodeMatcher(instructions)
-            .MatchForward(false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(Steamworks.SteamFriends), nameof(Steamworks.SteamFriends.GetPersonaName))))
+            .MatchForward(false, new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(SteamFriends), nameof(SteamFriends.GetPersonaName))))
             .SetOperandAndAdvance(AccessTools.Method(typeof(SteamLobbyPatches), nameof(GetLobbyName)))
             .InstructionEnumeration();
     }
 
     private static string GetLobbyName()
     {
-        return ".1 This is a test name"; // TODO: Implement logic to read from config
+        var lobbyName = GANLConfig.LobbyName.Value;
+        return string.IsNullOrEmpty(lobbyName) ? SteamFriends.GetPersonaName() : lobbyName;
     }
 }

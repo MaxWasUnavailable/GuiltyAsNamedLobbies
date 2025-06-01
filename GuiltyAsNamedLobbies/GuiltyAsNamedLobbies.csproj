@@ -1,0 +1,91 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- General Project Information -->
+        <TargetFramework>net48</TargetFramework>
+        <AssemblyName>MaxWasUnavailable.GuiltyAsNamedLobbies</AssemblyName>
+        <PackageId>MaxWasUnavailable.GuiltyAsNamedLobbies</PackageId>
+        <Title>GuiltyAsNamedLobbies</Title>
+        <Description>A mod for Guilty As Sock! that allows you to give a custom name to your lobby.</Description>
+        <Version>1.0.0</Version>
+        <Authors>MaxWasUnavailable</Authors>
+        <PackageTags>guilty;as;sock;bepinex</PackageTags>
+
+        <!-- Package Information -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/MaxWasUnavailable/GuiltyAsNamedLobbies</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/MaxWasUnavailable/GuiltyAsNamedLobbies</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <!-- Build Information -->
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+
+        <!-- NuGet Information -->
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+
+        <!-- Documentation -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Prevent Publicizer Warnings from Showing -->
+        <NoWarn>$(NoWarn);CS0436</NoWarn>
+
+        <!-- Mod Destination -->
+        <ModDestination>$(GUILTY_AS_SOCK_REFERENCES)\..\..\BepInEx\plugins</ModDestination>
+    </PropertyGroup>
+
+    <!-- Include README and CHANGELOG in the package -->
+    <ItemGroup>
+        <None Include="$(ProjectDir)../README.md" Pack="true" PackagePath="/"/>
+        <None Include="$(ProjectDir)../CHANGELOG.md" Pack="true" PackagePath="/"/>
+    </ItemGroup>
+
+    <!-- BepInEx Package References -->
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" ExcludeAssets="runtime"/>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.*"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*"/>
+    </ItemGroup>
+
+    <!-- Guilty As Sock!-specific Assembly References -->
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\Assembly-CSharp.dll" Private="False" Publicize="True"/>
+        <Reference Include="Assembly-CSharp-firstpass" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\Assembly-CSharp-firstpass.dll" Private="False" Publicize="True"/>
+        <Reference Include="UnityEngine" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\UnityEngine.dll" Private="False" Publicize="True"/>
+        <Reference Include="UnityEngine.CoreModule" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\UnityEngine.CoreModule.dll" Private="False" Publicize="True"/>
+        <Reference Include="Steamworks" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\com.rlabrecque.steamworks.net.dll" Private="False" Publicize="True"/>
+        <Reference Include="Mirror" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\Mirror.dll" Private="False" Publicize="True"/>
+        <Reference Include="Mirror.Authenticators" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\Mirror.Authenticators.dll" Private="False" Publicize="True"/>
+        <Reference Include="Mirror.Components" HintPath="$(GUILTY_AS_SOCK_REFERENCES)\Mirror.Components.dll" Private="False" Publicize="True"/>
+    </ItemGroup>
+
+    <!-- Extra Package References -->
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(ModDestination)' != ''">
+        <!-- Create an item for all .dll files in the output directory -->
+        <CreateItem Include="$(OutDir)*.dll">
+            <Output TaskParameter="Include" ItemName="DllFiles"/>
+        </CreateItem>
+
+        <!-- Copy the build output -->
+        <Message Text="Copying build output assemblies from $(OutDir)*.dll to $(ModDestination)\$(AssemblyName)" Importance="high"/>
+        <Copy SourceFiles="@(DllFiles)" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
+
+        <!-- Copy README, CHANGELOG & LICENSE -->
+        <Message Text="Copying README from $(ProjectDir)..\README.md to $(ModDestination)\$(AssemblyName)" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\README.md" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
+        <Message Text="Copying CHANGELOG from $(ProjectDir)..\CHANGELOG.md to $(ModDestination)" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\CHANGELOG.md" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
+        <Message Text="Copying LICENSE from $(ProjectDir)..\LICENSE to $(ModDestination)" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\LICENSE" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
+    </Target>
+</Project>

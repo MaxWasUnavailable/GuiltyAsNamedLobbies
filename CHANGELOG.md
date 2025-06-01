@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 01-06-2025
+
 ### Added
 
 - Initial setup of the project
+- Patch for SteamLobby creation
+- Config option for lobby name
